@@ -1,133 +1,196 @@
-# 🎾 ScoreApp
+# 🎾 ScoreApp — Club Deportivo
 
-Aplicación web SPA de resultados en tiempo real para **Tenis** y **Pádel**, inspirada visualmente en Sofascore, Flashscore y Bet365 Scores.
-
-> Proyecto en desarrollo activo. Actualmente sin backend — toda la data se simula mediante mocks JSON.
+Plataforma web de gestión de resultados en tiempo real para un **club local de Tenis y Pádel** en Cúcuta, Colombia.
+Inspirada visualmente en Sofascore y Flashscore, adaptada para uso interno del club.
 
 ---
 
 ## 🚀 Stack tecnológico
 
+### Frontend
 | Tecnología | Uso |
 |---|---|
-| React 19 | UI principal |
-| Vite | Bundler y dev server |
-| React Router DOM | Navegación SPA |
-| TailwindCSS | Estilos utilitarios |
-| Zustand | Manejo de estado global |
-| Axios | Cliente HTTP (preparado para API) |
-| React Hook Form | Formularios |
-| Zod | Validación de esquemas |
+| React 19 + Vite | UI y bundler |
+| React Router DOM v6 | Navegación SPA |
+| TailwindCSS | Utilidades de layout |
+| CSS Variables | Sistema de temas (claro/oscuro) |
+| Zustand | Estado global |
+| Axios | Cliente HTTP |
+| React Hook Form | Formularios con validación |
 | Lucide React | Iconografía |
+
+### Backend
+| Tecnología | Uso |
+|---|---|
+| Node.js + Express | API REST |
+| MySQL 8.0 (XAMPP) | Base de datos |
+| bcryptjs | Hash de contraseñas |
+| jsonwebtoken | Autenticación JWT |
+| nodemailer | Envío de OTP por correo |
+| multer + uuid | Subida de imágenes |
 
 ---
 
 ## 📁 Estructura del proyecto
 
 ```
-src/
-├── assets/           # Imágenes, fuentes, íconos estáticos
-├── components/       # Componentes reutilizables
-│   ├── ui/           # Botones, inputs, modales, etc.
-│   ├── layout/       # Header, Sidebar, BottomNavigation
-│   ├── match/        # MatchCard, LiveBadge, ScoreDisplay
-│   ├── player/       # PlayerCard
-│   ├── team/         # TeamCard
-│   └── common/       # SearchBar, StatsCard, SectionHeader, EmptyState
-├── hooks/            # Custom hooks
-├── layouts/          # AuthLayout, AppLayout
-├── mocks/            # Datos simulados en JSON
-├── pages/            # Vistas de cada ruta
-│   └── auth/         # Login, Register, ForgotPassword
-├── routes/           # Configuración de rutas y rutas protegidas
-├── services/         # Capa de servicios (preparada para backend)
-├── store/            # Stores de Zustand
-├── styles/           # CSS global
-└── utils/            # Funciones utilitarias
+ScoresApp/
+├── scores-app/          ← Frontend React
+│   ├── src/
+│   │   ├── components/  ← Componentes reutilizables
+│   │   ├── layouts/     ← AuthLayout, AppLayout, AdminLayout
+│   │   ├── pages/       ← Vistas públicas
+│   │   │   ├── admin/   ← Panel de administración
+│   │   │   └── auth/    ← Login, Register, ForgotPassword
+│   │   ├── routes/      ← Router, ProtectedRoute, AdminRoute
+│   │   ├── services/    ← Llamadas a la API
+│   │   ├── store/       ← Stores de Zustand
+│   │   ├── hooks/       ← Custom hooks
+│   │   └── utils/       ← Utilidades
+│   └── reset_db.sql     ← Script de DB completo
+│
+└── scores-api/          ← Backend Express
+    ├── server.js
+    └── src/
+        ├── config/
+        ├── middlewares/
+        ├── modules/     ← auth, jugadores, equipos, torneos, partidos...
+        └── utils/
 ```
 
 ---
 
 ## 🗺️ Rutas
 
+### App (miembros)
 | Ruta | Descripción |
 |---|---|
-| `/` | Home — partidos destacados, noticias, ranking |
+| `/` | Home — partidos en vivo, anuncios, próximos |
 | `/live` | Partidos en directo |
-| `/tennis` | Sección ATP / WTA / Challenger / ITF |
-| `/padel` | Sección Premier Padel / A1 Padel |
+| `/tennis` | Sección tenis |
+| `/padel` | Sección pádel |
 | `/match/:id` | Detalle de partido |
 | `/player/:id` | Perfil de jugador |
-| `/team/:id` | Perfil de pareja de pádel |
-| `/favorites` | Favoritos del usuario |
+| `/team/:id` | Perfil de pareja |
+| `/favorites` | Favoritos |
 | `/profile` | Perfil de usuario |
 | `/settings` | Configuración |
-| `/login` | Inicio de sesión |
-| `/register` | Registro |
-| `/forgot-password` | Recuperación de contraseña |
+
+### Admin (solo rol admin)
+| Ruta | Descripción |
+|---|---|
+| `/admin` | Dashboard del club |
+| `/admin/jugadores` | CRUD de jugadores |
+| `/admin/equipos` | CRUD de parejas de pádel |
+| `/admin/torneos` | CRUD de torneos |
+| `/admin/partidos` | CRUD de partidos + marcador en vivo |
+
+### Auth
+| Ruta | Descripción |
+|---|---|
+| `/login` | Login con CC + contraseña |
+| `/register` | Registro (1er usuario = admin) |
+| `/forgot-password` | Recuperación con OTP por email |
 
 ---
 
-## 🎨 Diseño
+## 🎨 Sistema de diseño
 
-- **Modo oscuro** por defecto
-- **Responsive**: sidebar fija en desktop, colapsable en tablet, bottom navigation en mobile
-- **Colores principales**
+El proyecto usa **CSS Variables** para temas, NO clases de color de Tailwind.
 
+```css
+/* Modo claro — Verde */
+--color-brand:   #16a34a;
+--bg-primary:    #f4fbf7;
+
+/* Modo oscuro — Naranja/Negro OLED */
+--color-brand:   #ea580c;
+--bg-primary:    #000000;
 ```
-Background:   #111827
-Sidebar:      #1f2937
-Cards:        #374151
-Brand:        #0284c7
-Texto:        #ffffff
-Secundario:   #9ca3af
-```
+
+Para cambiar el color principal basta con editar `src/styles/globals.css`.
+
+**Tailwind** se usa solo para **layout y espaciado** (`flex`, `grid`, `px-4`, etc.).
+Los colores siempre van con `style={{ color: 'var(--text-primary)' }}` o clases CSS propias.
 
 ---
 
 ## ⚙️ Instalación y uso
 
-```bash
-# Clonar el repositorio
-git clone https://github.com/tu-usuario/scores-app.git
-cd scores-app
+### Prerequisitos
+- Node.js 18+
+- XAMPP con MySQL corriendo
 
-# Instalar dependencias
-npm install
-
-# Iniciar en desarrollo
-npm run dev
-
-# Build para producción
-npm run build
+### Base de datos
+```sql
+-- En MySQL Workbench ejecutar:
+source /ruta/al/proyecto/scores-app/reset_db.sql
 ```
+
+### Backend
+```bash
+cd scores-api
+npm install
+# Configurar .env con credenciales DB y mail
+node server.js
+# Corre en http://localhost:3001
+```
+
+### Frontend
+```bash
+cd scores-app
+npm install
+npm run dev
+# Corre en http://localhost:5173
+```
+
+### Primer acceso
+1. Ve a `http://localhost:5173/register`
+2. Regístrate — **el primer usuario será admin automáticamente**
+3. Los demás usuarios serán miembros
+
+---
+
+## 🔐 Roles
+
+| Rol | Acceso |
+|---|---|
+| `admin` | Todo — incluyendo `/admin/*` |
+| `miembro` | Solo vistas públicas del club |
+
+---
+
+## 🗄️ Base de datos
+
+Tablas principales:
+`users` · `jugadores` · `jugador_stats` · `equipos_padel` · `torneos` · `partidos` · `sets_partido` · `categorias` · `sedes` · `canchas` · `inscripciones` · `anuncios` · `favoritos`
 
 ---
 
 ## 📦 Estado del proyecto
 
-- [x] Estructura base del proyecto
-- [ ] Configuración (Vite, Tailwind, Router)
-- [ ] Componentes UI base
-- [ ] Layout principal (Sidebar, Header, BottomNav)
-- [ ] Mocks JSON
-- [ ] Páginas principales
-- [ ] Autenticación (mock)
-- [ ] Favoritos con Zustand
-- [ ] Conexión con backend real
+- [x] Auth completo (registro CC, login, recuperación OTP)
+- [x] Primer usuario = admin automático
+- [x] Sistema de temas claro/oscuro
+- [x] Layout responsive (sidebar, bottom nav, header)
+- [x] Panel admin (jugadores, equipos, torneos, partidos)
+- [x] Marcador en tiempo real desde el admin
+- [x] Páginas públicas (home, live, tenis, pádel, favoritos)
+- [ ] Tabla de posiciones (página pública)
+- [ ] Perfil de usuario conectado al backend
+- [ ] Subida de fotos (jugadores, equipos)
+- [ ] Notificaciones push
+- [ ] Modo oscuro persistente entre sesiones
 
 ---
 
 ## 🤝 Contribuir
 
-1. Haz fork del repositorio
-2. Crea tu rama: `git checkout -b feature/nueva-funcionalidad`
-3. Commitea tus cambios: `git commit -m "feat: descripción"`
-4. Push a tu rama: `git push origin feature/nueva-funcionalidad`
-5. Abre un Pull Request
-
----
+```bash
+git checkout -b feature/nombre-funcionalidad
+git commit -m "feat: descripción"
+git push origin feature/nombre-funcionalidad
+```
 
 ## 📄 Licencia
-
 MIT
