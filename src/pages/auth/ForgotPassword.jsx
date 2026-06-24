@@ -1,127 +1,184 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react'
-import useAuthStore from '../../store/useAuthStore'
-import useUIStore   from '../../store/useUIStore'
-import Button from '../../components/ui/Button'
-import Input  from '../../components/ui/Input'
+import { useState }         from 'react'
+import { Link }             from 'react-router-dom'
+import { useForm }          from 'react-hook-form'
+import { Mail, Lock, ArrowLeft } from 'lucide-react'
+import { authService }      from '../../services/authService'
+import useUIStore           from '../../store/useUIStore'
+import Button               from '../../components/ui/Button'
+import Input                from '../../components/ui/Input'
 
-export default function Register() {
-  const [showPassword, setShowPassword] = useState(false)
-  const { login }    = useAuthStore()
+const STEPS = { EMAIL: 1, OTP: 2, PASSWORD: 3, SUCCESS: 4 }
+
+export default function ForgotPassword() {
+  const [step,  setStep]  = useState(STEPS.EMAIL)
+  const [email, setEmail] = useState('')
+  const [otp,   setOtp]   = useState(['', '', '', '', '', ''])
   const { addToast } = useUIStore()
-  const navigate     = useNavigate()
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm()
-
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm()
   const password = watch('password')
 
-  const onSubmit = async (data) => {
-    await new Promise((r) => setTimeout(r, 1000))
-
-    const newUser = {
-      id:       'u-' + Date.now(),
-      name:     data.name,
-      lastName: data.lastName,
-      email:    data.email,
+  const onEmailSubmit = async (data) => {
+    try {
+      await authService.forgotPassword(data.email)
+      setEmail(data.email)
+      setStep(STEPS.OTP)
+      addToast({ type: 'success', title: 'Código enviado', message: `Revisa tu correo ${data.email}` })
+    } catch (err) {
+      addToast({ type: 'error', title: 'Error', message: err.message || 'Correo no encontrado' })
     }
+  }
 
-    login(newUser, 'mock-token-' + newUser.id)
-    addToast({ type: 'success', title: '¡Cuenta creada!', message: `Bienvenido, ${data.name}` })
-    navigate('/')
+  const onOtpSubmit = async (e) => {
+    e.preventDefault()
+    const code = otp.join('')
+    if (code.length < 6) {
+      addToast({ type: 'error', title: 'Ingresa el código completo' })
+      return
+    }
+    try {
+      await authService.verifyOtp({ email, otp_code: code })
+      setStep(STEPS.PASSWORD)
+    } catch (err) {
+      addToast({ type: 'error', title: 'Código inválido', message: err.message })
+    }
+  }
+
+  const onPasswordSubmit = async (data) => {
+    try {
+      await authService.resetPassword({
+        email,
+        otp_code: otp.join(''),
+        password: data.password,
+      })
+      setStep(STEPS.SUCCESS)
+      addToast({ type: 'success', title: 'Contraseña actualizada' })
+    } catch (err) {
+      addToast({ type: 'error', title: 'Error', message: err.message })
+    }
+  }
+
+  const handleOtpChange = (val, idx) => {
+    const next = [...otp]
+    next[idx] = val.slice(-1)
+    setOtp(next)
+    if (val && idx < 5) document.getElementById(`otp-${idx + 1}`)?.focus()
   }
 
   return (
-    <div className="max-w-sm mx-auto animate-fade-up">
+    <div className="auth-card animate-fade-up">
 
-      <div className="text-center mb-8">
-        <div className="w-14 h-14 bg-brand rounded-2xl flex items-center justify-center text-text-primary text-2xl font-bold mx-auto mb-4 shadow-lg shadow-brand/30">
-          S
-        </div>
-        <h1 className="text-2xl font-bold text-text-primary">Crear cuenta</h1>
-        <p className="text-text-secondary text-sm mt-1">Únete a ScoreApp hoy</p>
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--text-primary)' }}>
+          {step === STEPS.EMAIL    && 'Recuperar contraseña'}
+          {step === STEPS.OTP      && 'Verificar código'}
+          {step === STEPS.PASSWORD && 'Nueva contraseña'}
+          {step === STEPS.SUCCESS  && '¡Listo!'}
+        </h1>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          {step === STEPS.EMAIL    && 'Ingresa tu correo para continuar'}
+          {step === STEPS.OTP      && `Código enviado a ${email}`}
+          {step === STEPS.PASSWORD && 'Crea una nueva contraseña segura'}
+          {step === STEPS.SUCCESS  && 'Tu contraseña fue actualizada correctamente'}
+        </p>
       </div>
 
-      <div className="bg-app-card border border-border-light rounded-2xl p-6 shadow-xl">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* Step indicator */}
+      {step !== STEPS.SUCCESS && (
+        <div className="flex items-center justify-center gap-2 mb-6">
+          {[1, 2, 3].map((s) => (
+            <div key={s} className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all"
+                style={{
+                  backgroundColor: step > s ? 'var(--color-brand)' : step === s ? 'var(--color-brand-dim)' : 'var(--bg-hover)',
+                  color:           step > s ? '#fff' : step === s ? 'var(--color-brand)' : 'var(--text-muted)',
+                  border:          step === s ? '1px solid var(--color-brand)' : '1px solid var(--border-color)',
+                }}>
+                {step > s ? '✓' : s}
+              </div>
+              {s < 3 && <div className="w-8 h-px" style={{ backgroundColor: step > s ? 'var(--color-brand)' : 'var(--border-color)' }} />}
+            </div>
+          ))}
+        </div>
+      )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              label="Nombre"
-              placeholder="Carlos"
-              leftIcon={<User className="w-4 h-4" />}
-              error={errors.name?.message}
-              {...register('name', { required: 'Requerido' })}
-            />
-            <Input
-              label="Apellidos"
-              placeholder="García"
-              error={errors.lastName?.message}
-              {...register('lastName', { required: 'Requerido' })}
-            />
-          </div>
-
-          <Input
-            label="Correo electrónico"
-            type="email"
-            placeholder="tu@email.com"
+      {/* Step 1 — Email */}
+      {step === STEPS.EMAIL && (
+        <form onSubmit={handleSubmit(onEmailSubmit)} className="flex flex-col gap-4">
+          <Input label="Correo electrónico" type="email" placeholder="tu@email.com"
             leftIcon={<Mail className="w-4 h-4" />}
             error={errors.email?.message}
-            {...register('email', {
-              required: 'El correo es requerido',
-              pattern:  { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' },
-            })}
-          />
+            {...register('email', { required: 'El correo es requerido' })} />
+          <Button type="submit" fullWidth loading={isSubmitting}>Enviar código</Button>
+        </form>
+      )}
 
-          <Input
-            label="Contraseña"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Mínimo 8 caracteres"
+      {/* Step 2 — OTP */}
+      {step === STEPS.OTP && (
+        <form onSubmit={onOtpSubmit} className="flex flex-col gap-4">
+          <div>
+            <label className="form-label mb-3 block">Código de 6 dígitos</label>
+            <div className="flex items-center gap-2 justify-center">
+              {otp.map((digit, idx) => (
+                <input key={idx} id={`otp-${idx}`}
+                  type="text" inputMode="numeric" maxLength={1} value={digit}
+                  onChange={(e) => handleOtpChange(e.target.value, idx)}
+                  className="form-input w-11 h-12 text-center text-lg font-bold p-0"
+                />
+              ))}
+            </div>
+          </div>
+          <Button type="submit" fullWidth>Verificar código</Button>
+          <button type="button" className="btn-ghost text-xs w-full"
+            onClick={() => authService.forgotPassword(email).catch(() => {})}
+            style={{ color: 'var(--text-muted)' }}>
+            ¿No recibiste el código? Reenviar
+          </button>
+        </form>
+      )}
+
+      {/* Step 3 — Nueva contraseña */}
+      {step === STEPS.PASSWORD && (
+        <form onSubmit={handleSubmit(onPasswordSubmit)} className="flex flex-col gap-4">
+          <Input label="Nueva contraseña" type="password" placeholder="Mínimo 8 caracteres"
             leftIcon={<Lock className="w-4 h-4" />}
-            rightIcon={
-              <button type="button" onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            }
             error={errors.password?.message}
             {...register('password', {
               required:  'La contraseña es requerida',
               minLength: { value: 8, message: 'Mínimo 8 caracteres' },
-            })}
-          />
-
-          <Input
-            label="Confirmar contraseña"
-            type="password"
-            placeholder="Repite tu contraseña"
+            })} />
+          <Input label="Confirmar contraseña" type="password" placeholder="Repite tu contraseña"
             leftIcon={<Lock className="w-4 h-4" />}
             error={errors.confirmPassword?.message}
             {...register('confirmPassword', {
               required: 'Confirma tu contraseña',
-              validate: (val) => val === password || 'Las contraseñas no coinciden',
-            })}
-          />
-
-          <Button type="submit" fullWidth size="lg" loading={isSubmitting}>
-            Crear cuenta
-          </Button>
-
+              validate: (v) => v === password || 'Las contraseñas no coinciden',
+            })} />
+          <Button type="submit" fullWidth loading={isSubmitting}>Guardar contraseña</Button>
         </form>
-      </div>
+      )}
 
-      <p className="text-center text-sm text-text-secondary mt-4">
-        ¿Ya tienes cuenta?{' '}
-        <Link to="/login" className="text-brand hover:text-brand-light font-medium transition-colors">
-          Inicia sesión
-        </Link>
-      </p>
+      {/* Step 4 — Éxito */}
+      {step === STEPS.SUCCESS && (
+        <div className="text-center py-4 flex flex-col gap-4">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto text-3xl"
+            style={{ backgroundColor: 'rgba(34,197,94,0.15)' }}>✓</div>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Ya puedes iniciar sesión con tu nueva contraseña.
+          </p>
+          <Link to="/login"><Button fullWidth>Iniciar sesión</Button></Link>
+        </div>
+      )}
 
+      {step !== STEPS.SUCCESS && (
+        <div className="text-center mt-5">
+          <Link to="/login" className="inline-flex items-center gap-2 text-sm"
+            style={{ color: 'var(--text-muted)' }}>
+            <ArrowLeft className="w-4 h-4" /> Volver al inicio de sesión
+          </Link>
+        </div>
+      )}
     </div>
   )
 }

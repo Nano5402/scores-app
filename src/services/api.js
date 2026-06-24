@@ -6,6 +6,7 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+// ── Adjuntar token en cada request ───────────────────
 api.interceptors.request.use(
   (config) => {
     try {
@@ -20,12 +21,21 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
+// ── Manejar respuestas ────────────────────────────────
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('auth-storage')
-      window.location.href = '/login'
+      try {
+        const stored = localStorage.getItem('auth-storage')
+        if (stored) {
+          const { state } = JSON.parse(stored)
+          if (state?.token) {
+            localStorage.removeItem('auth-storage')
+            window.location.href = '/login'
+          }
+        }
+      } catch (_) {}
     }
     return Promise.reject(error.response?.data || error)
   }

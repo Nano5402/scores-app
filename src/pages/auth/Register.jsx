@@ -1,96 +1,257 @@
-import { useState }         from 'react'
-import { Link, useNavigate} from 'react-router-dom'
-import { useForm }          from 'react-hook-form'
+import { useState }          from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useForm }           from 'react-hook-form'
 import { Eye, EyeOff, Mail, Lock, User, CreditCard } from 'lucide-react'
-import useAuthStore         from '../../store/useAuthStore'
-import useUIStore           from '../../store/useUIStore'
-import { authService }      from '../../services/authService'
-import Button               from '../../components/ui/Button'
-import Input                from '../../components/ui/Input'
+import useAuthStore    from '../../store/useAuthStore'
+import useUIStore      from '../../store/useUIStore'
+import { authService } from '../../services/authService'
+import Button          from '../../components/ui/Button'
+import Input           from '../../components/ui/Input'
+
+// ── Reglas de validación ──────────────────────────────
+const SOLO_LETRAS = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]{3,}$/
+const PASSWORD_FUERTE = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-])[A-Za-z\d@$!%*?&._\-]{6,}$/
 
 export default function Register() {
-  const [showPwd, setShowPwd] = useState(false)
+  const [showPwd,     setShowPwd]     = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const { login }    = useAuthStore()
   const { addToast } = useUIStore()
   const navigate     = useNavigate()
 
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm()
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm({ mode: 'onBlur' })
+
   const password = watch('password')
 
   const onSubmit = async (data) => {
     try {
       const res = await authService.register({
         numero_documento: data.numero_documento,
-        nombre: data.nombre, apellido: data.apellido,
-        email: data.email,   password: data.password,
+        nombre:           data.nombre,
+        apellido:         data.apellido,
+        email:            data.email,
+        password:         data.password,
       })
-      login(res.user, res.token)
-      addToast({ type: 'success', title: '¡Cuenta creada!', message: `Bienvenido, ${res.user.nombre}` })
+      const user  = res?.user  ?? res?.data?.user
+      const token = res?.token ?? res?.data?.token
+
+      if (!user || !token) throw new Error('Respuesta del servidor inválida')
+
+      login(user, token)
+      addToast({ type: 'success', title: '¡Cuenta creada!', message: `Bienvenido, ${user.nombre}` })
       navigate('/')
     } catch (err) {
-      addToast({ type: 'error', title: 'Error', message: err.message || 'No se pudo crear la cuenta' })
+      addToast({
+        type:    'error',
+        title:   'Error al registrarse',
+        message: err.message || 'No se pudo crear la cuenta',
+      })
     }
   }
 
   return (
-    <div className="max-w-sm mx-auto animate-fade-up">
-      <div className="text-center mb-8">
-        <div className="w-14 h-14 bg-brand rounded-2xl flex items-center justify-center text-text-primary text-2xl font-bold mx-auto mb-4 shadow-lg shadow-brand/30">S</div>
-        <h1 className="text-2xl font-bold text-text-primary">Crear cuenta</h1>
-        <p className="text-text-secondary text-sm mt-1">Únete a ScoreApp hoy</p>
+    <div
+      className="w-full animate-fade-up"
+      style={{ maxWidth: '520px' }}
+    >
+      {/* Header */}
+      <div className="text-center mb-5">
+        <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl font-black mx-auto mb-3"
+          style={{ backgroundColor: 'var(--color-brand)', boxShadow: 'var(--shadow-brand)' }}
+        >
+          S
+        </div>
+        <h1 className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
+          Crear Cuenta
+        </h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+          Completa todos los campos para registrarte
+        </p>
       </div>
 
-      <div className="bg-app-card border border-border-light rounded-2xl p-6 shadow-xl">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* Card */}
+      <div
+        className="rounded-2xl p-5"
+        style={{
+          backgroundColor: 'var(--bg-sidebar)',
+          border:          '1px solid var(--border-color)',
+          boxShadow:       'var(--shadow-card)',
+        }}
+      >
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-text-secondary">Número de cédula</label>
+          {/* Fila 1: Nombre + Apellido */}
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="form-group">
+              <label className="form-label">Nombres *</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                  style={{ color: 'var(--text-muted)' }} />
+                <input
+                  placeholder="Juan Carlos"
+                  className={`form-input pl-9 ${errors.nombre ? 'error' : ''}`}
+                  {...register('nombre', {
+                    required:  'El nombre es requerido',
+                    minLength: { value: 3, message: 'Mínimo 3 letras' },
+                    pattern:   { value: SOLO_LETRAS, message: 'Mínimo 3 letras, sin números ni caracteres especiales' },
+                  })}
+                />
+              </div>
+              {errors.nombre && <p className="form-error">{errors.nombre.message}</p>}
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Apellidos *</label>
+              <input
+                placeholder="Pérez Gómez"
+                className={`form-input ${errors.apellido ? 'error' : ''}`}
+                {...register('apellido', {
+                  required:  'El apellido es requerido',
+                  minLength: { value: 3, message: 'Mínimo 3 letras' },
+                  pattern:   { value: SOLO_LETRAS, message: 'Mínimo 3 letras, sin números ni caracteres especiales' },
+                })}
+              />
+              {errors.apellido && <p className="form-error">{errors.apellido.message}</p>}
+            </div>
+          </div>
+
+          {/* Fila 2: Documento */}
+          <div className="form-group mb-3">
+            <label className="form-label">Documento *</label>
             <div className="flex gap-2">
-              <div className="flex items-center justify-center px-3 bg-border-light border border-border-light rounded-lg text-xs font-bold text-brand shrink-0">CC</div>
+              <div
+                className="flex items-center justify-center px-3 rounded-lg text-xs font-bold shrink-0"
+                style={{
+                  backgroundColor: 'var(--color-brand-dim)',
+                  color:           'var(--color-brand)',
+                  border:          '1px solid var(--border-color)',
+                }}
+              >
+                CC
+              </div>
               <div className="relative flex-1">
-                <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
-                <input type="number" placeholder="1000123456"
-                  className={`w-full bg-app-card border rounded-lg pl-10 pr-3 py-2.5 text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:ring-2 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
-                    ${errors.numero_documento ? 'border-red-500 focus:ring-red-500/20' : 'border-border-light focus:border-brand focus:ring-brand/20'}`}
-                  {...register('numero_documento', { required: 'El número de documento es requerido', minLength: { value: 6, message: 'Mínimo 6 dígitos' } })}
+                <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                  style={{ color: 'var(--text-muted)' }} />
+                <input
+                  type="number"
+                  placeholder="Solo números, mínimo 7 dígitos"
+                  className={`form-input pl-9 ${errors.numero_documento ? 'error' : ''}`}
+                  {...register('numero_documento', {
+                    required:  'El documento es requerido',
+                    minLength: { value: 7,  message: 'Solo números, mínimo 7 dígitos' },
+                    maxLength: { value: 12, message: 'Máximo 12 dígitos' },
+                    pattern:   { value: /^\d+$/, message: 'Solo números, mínimo 7 dígitos' },
+                  })}
                 />
               </div>
             </div>
-            {errors.numero_documento && <p className="text-xs text-red-400">{errors.numero_documento.message}</p>}
+            {errors.numero_documento && (
+              <p className="form-error">{errors.numero_documento.message}</p>
+            )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Input label="Nombre" placeholder="Carlos" leftIcon={<User className="w-4 h-4" />} error={errors.nombre?.message} {...register('nombre', { required: 'Requerido' })} />
-            <Input label="Apellidos" placeholder="García" error={errors.apellido?.message} {...register('apellido', { required: 'Requerido' })} />
+          {/* Fila 3: Email */}
+          <div className="form-group mb-3">
+            <label className="form-label">Correo Electrónico *</label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                style={{ color: 'var(--text-muted)' }} />
+              <input
+                type="email"
+                placeholder="correo@ejemplo.com"
+                className={`form-input pl-9 ${errors.email ? 'error' : ''}`}
+                {...register('email', {
+                  required: 'El correo es requerido',
+                  pattern:  {
+                    value:   /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: 'Ingresa un correo electrónico válido',
+                  },
+                })}
+              />
+            </div>
+            {errors.email && <p className="form-error">{errors.email.message}</p>}
           </div>
 
-          <Input label="Correo electrónico" type="email" placeholder="tu@email.com"
-            leftIcon={<Mail className="w-4 h-4" />}
-            hint="Lo usarás para recuperar tu contraseña"
-            error={errors.email?.message}
-            {...register('email', { required: 'El correo es requerido', pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' } })}
-          />
+          {/* Fila 4: Contraseña + Confirmar */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="form-group">
+              <label className="form-label">Contraseña *</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                  style={{ color: 'var(--text-muted)' }} />
+                <input
+                  type={showPwd ? 'text' : 'password'}
+                  placeholder="Mínimo 6 caracteres"
+                  className={`form-input pl-9 pr-9 ${errors.password ? 'error' : ''}`}
+                  {...register('password', {
+                    required: 'La contraseña es requerida',
+                    pattern:  {
+                      value:   PASSWORD_FUERTE,
+                      message: 'Mínimo 6 caracteres, 1 mayúscula, 1 número y 1 carácter especial',
+                    },
+                  })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd(!showPwd)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {errors.password && <p className="form-error">{errors.password.message}</p>}
+            </div>
 
-          <Input label="Contraseña" type={showPwd ? 'text' : 'password'} placeholder="Mínimo 8 caracteres"
-            leftIcon={<Lock className="w-4 h-4" />}
-            rightIcon={<button type="button" onClick={() => setShowPwd(!showPwd)}>{showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>}
-            error={errors.password?.message}
-            {...register('password', { required: 'La contraseña es requerida', minLength: { value: 8, message: 'Mínimo 8 caracteres' } })}
-          />
+            <div className="form-group">
+              <label className="form-label">Confirmar *</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                  style={{ color: 'var(--text-muted)' }} />
+                <input
+                  type={showConfirm ? 'text' : 'password'}
+                  placeholder="Repítela"
+                  className={`form-input pl-9 pr-9 ${errors.confirmPassword ? 'error' : ''}`}
+                  {...register('confirmPassword', {
+                    required: 'Confirma tu contraseña',
+                    validate: (v) => v === password || 'Las contraseñas no coinciden',
+                  })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="form-error">{errors.confirmPassword.message}</p>
+              )}
+            </div>
+          </div>
 
-          <Input label="Confirmar contraseña" type="password" placeholder="Repite tu contraseña"
-            leftIcon={<Lock className="w-4 h-4" />}
-            error={errors.confirmPassword?.message}
-            {...register('confirmPassword', { required: 'Confirma tu contraseña', validate: (v) => v === password || 'Las contraseñas no coinciden' })}
-          />
+          {/* Botón */}
+          <Button type="submit" fullWidth size="lg" loading={isSubmitting}>
+            Crear cuenta
+          </Button>
 
-          <Button type="submit" fullWidth size="lg" loading={isSubmitting}>Crear cuenta</Button>
         </form>
       </div>
 
-      <p className="text-center text-sm text-text-secondary mt-4">
+      {/* Link a login */}
+      <p className="text-center text-sm mt-4" style={{ color: 'var(--text-muted)' }}>
         ¿Ya tienes cuenta?{' '}
-        <Link to="/login" className="text-brand hover:text-brand-light font-medium transition-colors">Inicia sesión</Link>
+        <Link to="/login" className="font-semibold" style={{ color: 'var(--color-brand)' }}>
+          Inicia sesión
+        </Link>
       </p>
     </div>
   )

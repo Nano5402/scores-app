@@ -9,9 +9,9 @@ import { newsService }         from '../services/newsService'
 import { formatRelative }      from '../utils/formatDate'
 
 export default function Home() {
-  const { matches: live,     loading: ll } = useMatches({ estado: 'live' })
-  const { matches: upcoming, loading: lu } = useMatches({ estado: 'upcoming' })
-  const { matches: finished }              = useMatches({ estado: 'finished' })
+  const { matches: live,     loading: ll } = useMatches({ estado: 'en_vivo' })
+  const { matches: upcoming, loading: lu } = useMatches({ estado: 'programado' })
+  const { matches: finished }              = useMatches({ estado: 'finalizado' })
   const [news, setNews] = useState([])
 
   useEffect(() => {
@@ -20,11 +20,18 @@ export default function Home() {
 
   return (
     <div className="space-y-8 animate-fade-up">
+
       {(ll || live.length > 0) && (
         <section>
-          <SectionHeader title="En vivo ahora"
+          <SectionHeader
+            title="En vivo ahora"
             subtitle={!ll ? `${live.length} partido${live.length !== 1 ? 's' : ''} en directo` : ''}
-            action={<Link to="/live" className="flex items-center gap-1 text-xs text-brand font-medium">Ver todos <ChevronRight className="w-3.5 h-3.5" /></Link>}
+            action={
+              <Link to="/live" className="flex items-center gap-1 text-xs font-medium"
+                style={{ color: 'var(--color-brand)' }}>
+                Ver todos <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            }
           />
           <div className="space-y-3">
             {ll ? Array(2).fill(0).map((_, i) => <MatchCardSkeleton key={i} />)
@@ -42,7 +49,7 @@ export default function Home() {
 
       {news.length > 0 && (
         <section>
-          <SectionHeader title="Noticias" />
+          <SectionHeader title="Anuncios del club" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {news.map((n) => <NewsCard key={n.id} article={n} />)}
           </div>
@@ -51,8 +58,14 @@ export default function Home() {
 
       {(lu || upcoming.length > 0) && (
         <section>
-          <SectionHeader title="Próximos partidos"
-            action={<Link to="/tennis" className="flex items-center gap-1 text-xs text-brand font-medium">Ver todos <ChevronRight className="w-3.5 h-3.5" /></Link>}
+          <SectionHeader
+            title="Próximos partidos"
+            action={
+              <Link to="/tennis" className="flex items-center gap-1 text-xs font-medium"
+                style={{ color: 'var(--color-brand)' }}>
+                Ver todos <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            }
           />
           <div className="space-y-3">
             {lu ? Array(2).fill(0).map((_, i) => <MatchCardSkeleton key={i} />)
@@ -60,20 +73,31 @@ export default function Home() {
           </div>
         </section>
       )}
+
     </div>
   )
 }
 
 function NewsCard({ article }) {
+  const tipos = {
+    noticia:   { label: 'Noticia',   class: 'badge-atp' },
+    evento:    { label: 'Evento',    class: 'badge-padel' },
+    resultado: { label: 'Resultado', class: 'badge-brand' },
+    aviso:     { label: 'Aviso',     class: 'badge-live' },
+  }
+  const tipo = tipos[article.tipo] || tipos.noticia
+
   return (
     <div className="card-hover p-4">
       <div className="flex items-center gap-2 mb-2">
-        <span className={article.deporte === 'tenis' ? 'badge-atp' : 'badge-padel'}>{article.categoria}</span>
-        <span className="text-[10px] text-text-muted">{article.tiempo_lec} min</span>
+        <span className={tipo.class}>{tipo.label}</span>
       </div>
-      <h3 className="text-sm font-medium text-text-primary leading-snug">{article.titulo}</h3>
-      <p className="text-xs text-text-secondary mt-1 line-clamp-2">{article.resumen}</p>
-      <p className="text-[10px] text-text-muted mt-2">{formatRelative(article.created_at)}</p>
+      <h3 className="text-sm font-medium leading-snug" style={{ color: 'var(--text-primary)' }}>
+        {article.titulo}
+      </h3>
+      <p className="text-[10px] mt-2" style={{ color: 'var(--text-muted)' }}>
+        {formatRelative(article.created_at)}
+      </p>
     </div>
   )
 }

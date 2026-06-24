@@ -8,14 +8,14 @@ import { useMatches }        from '../hooks/useMatches'
 import { Radio }             from 'lucide-react'
 
 const TABS = [
-  { value: 'all',    label: 'Todos' },
-  { value: 'tenis',  label: 'Tenis' },
-  { value: 'padel',  label: 'Pádel' },
+  { value: 'all',   label: 'Todos' },
+  { value: 'tenis', label: 'Tenis' },
+  { value: 'padel', label: 'Pádel' },
 ]
 
 export default function Live() {
-  const [tab, setTab] = useState('all')
-  const { matches, loading } = useMatches({ estado: 'live' })
+  const [tab, setTab]        = useState('all')
+  const { matches, loading } = useMatches({ estado: 'en_vivo' })
   const filtered = tab === 'all' ? matches : matches.filter((m) => m.deporte === tab)
 
   return (
@@ -23,10 +23,12 @@ export default function Live() {
       <div className="flex items-center gap-3">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <h1 className="text-xl font-bold text-text-primary">En Vivo</h1>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>En Vivo</h1>
             <LiveBadge />
           </div>
-          <p className="text-xs text-text-secondary">{loading ? '...' : `${matches.length} partido${matches.length !== 1 ? 's' : ''} en directo`}</p>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            {loading ? '...' : `${matches.length} partido${matches.length !== 1 ? 's' : ''} en directo`}
+          </p>
         </div>
       </div>
 
@@ -37,7 +39,8 @@ export default function Live() {
           ? Array(3).fill(0).map((_, i) => <MatchCardSkeleton key={i} />)
           : filtered.length > 0
             ? filtered.map((m) => <MatchCard key={m.id} match={m} />)
-            : <EmptyState icon={Radio} title="Sin partidos en vivo" description="No hay partidos en este momento. Vuelve más tarde." />
+            : <EmptyState icon={Radio} title="Sin partidos en vivo"
+                description="No hay partidos en este momento." />
         }
       </div>
     </div>

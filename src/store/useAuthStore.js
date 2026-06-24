@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 
 const useAuthStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       user:            null,
       isAuthenticated: false,
       token:           null,
@@ -23,6 +23,8 @@ const useAuthStore = create(
       updateUser: (updates) => set((state) => ({
         user: { ...state.user, ...updates },
       })),
+
+      isAdmin: () => get().user?.rol === 'admin',
     }),
     {
       name: 'auth-storage',

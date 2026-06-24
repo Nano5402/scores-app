@@ -2,11 +2,11 @@ import { useState }          from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm }           from 'react-hook-form'
 import { Eye, EyeOff, CreditCard, Lock } from 'lucide-react'
-import useAuthStore          from '../../store/useAuthStore'
-import useUIStore            from '../../store/useUIStore'
-import { authService }       from '../../services/authService'
-import Button                from '../../components/ui/Button'
-import Input                 from '../../components/ui/Input'
+import useAuthStore    from '../../store/useAuthStore'
+import useUIStore      from '../../store/useUIStore'
+import { authService } from '../../services/authService'
+import Button          from '../../components/ui/Button'
+import Input           from '../../components/ui/Input'
 
 export default function Login() {
   const [showPwd, setShowPwd] = useState(false)
@@ -18,19 +18,32 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
-      const res = await authService.login({ numero_documento: data.numero_documento, password: data.password })
-      login(res.user, res.token)
-      addToast({ type: 'success', title: '¡Bienvenido!', message: `Hola, ${res.user.nombre}` })
+      const res = await authService.login({
+        numero_documento: data.numero_documento,
+        password:         data.password,
+      })
+
+      // El backend puede devolver { user, token } o { data: { user, token } }
+      const user  = res?.user  ?? res?.data?.user
+      const token = res?.token ?? res?.data?.token
+
+      if (!user || !token) {
+        console.error('Respuesta inesperada del backend:', res)
+        throw new Error('Respuesta del servidor inválida')
+      }
+
+      login(user, token)
+      addToast({ type: 'success', title: '¡Bienvenido!', message: `Hola, ${user.nombre}` })
       navigate('/')
     } catch (err) {
-      setError('numero_documento', { message: err.message || 'Documento o contraseña incorrectos' })
+      setError('numero_documento', {
+        message: err.message || 'Documento o contraseña incorrectos',
+      })
     }
   }
 
   return (
     <div className="auth-card animate-fade-up">
-
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--text-primary)' }}>
           Iniciar sesión
@@ -42,7 +55,6 @@ export default function Login() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
 
-        {/* Documento */}
         <div className="form-group">
           <label className="form-label">Número de cédula</label>
           <div className="flex gap-2">
@@ -53,9 +65,10 @@ export default function Login() {
             <div className="relative flex-1">
               <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
                 style={{ color: 'var(--text-muted)' }} />
-              <input type="number" placeholder="1000123456"
+              <input
+                type="number"
+                placeholder="1090512345"
                 className={`form-input pl-10 ${errors.numero_documento ? 'error' : ''}`}
-                style={{ appearance: 'textfield' }}
                 {...register('numero_documento', {
                   required:  'El número de documento es requerido',
                   minLength: { value: 6, message: 'Mínimo 6 dígitos' },
@@ -63,10 +76,11 @@ export default function Login() {
               />
             </div>
           </div>
-          {errors.numero_documento && <p className="form-error">{errors.numero_documento.message}</p>}
+          {errors.numero_documento && (
+            <p className="form-error">{errors.numero_documento.message}</p>
+          )}
         </div>
 
-        {/* Contraseña */}
         <Input
           label="Contraseña"
           type={showPwd ? 'text' : 'password'}
@@ -81,7 +95,6 @@ export default function Login() {
           {...register('password', { required: 'La contraseña es requerida' })}
         />
 
-        {/* Recordar + Olvidé */}
         <div className="flex items-center justify-between">
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" className="rounded" {...register('remember')} />
@@ -108,6 +121,7 @@ export default function Login() {
           </svg>
           Continuar con Google
         </button>
+
       </form>
 
       <p className="text-center text-sm mt-6" style={{ color: 'var(--text-muted)' }}>

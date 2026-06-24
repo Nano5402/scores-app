@@ -1,83 +1,104 @@
 import { useParams, Link }    from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { ArrowLeft, Star }    from 'lucide-react'
-import { useState, useEffect }from 'react'
 import useFavoritesStore      from '../store/useFavoritesStore'
 import { teamService }        from '../services/teamService'
 import { cn }                 from '../utils/cn'
 
 export default function Team() {
-  const { id }   = useParams()
-  const [team, setTeam]     = useState(null)
+  const { id }  = useParams()
+  const [team,    setTeam]    = useState(null)
   const [loading, setLoading] = useState(true)
-  const { toggleTeam, isTeamFavorite } = useFavoritesStore()
+  const { toggleEquipo, isEquipoFavorite } = useFavoritesStore()
 
   useEffect(() => {
-    teamService.getById(id).then((r) => setTeam(r.data)).catch(() => {}).finally(() => setLoading(false))
+    teamService.getById(id)
+      .then((r) => setTeam(r.data))
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [id])
 
   if (loading) return <div className="skeleton h-48 w-full rounded-xl" />
-  if (!team)   return <p className="text-center text-text-secondary py-16">Equipo no encontrado</p>
+  if (!team)   return <p className="text-center py-16 text-sm" style={{ color: 'var(--text-muted)' }}>Equipo no encontrado</p>
 
-  const isFav = isTeamFavorite(team.id)
+  const isFav = isEquipoFavorite(team.id)
 
   return (
     <div className="space-y-5 animate-fade-up">
       <div className="flex items-center justify-between">
-        <Link to="/padel" className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors text-sm">
+        <Link to="/padel" className="flex items-center gap-2 text-sm transition-colors"
+          style={{ color: 'var(--text-secondary)' }}>
           <ArrowLeft className="w-4 h-4" /> Pádel
         </Link>
-        <button onClick={() => toggleTeam(team)}
-          className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all',
-            isFav ? 'text-yellow-400 bg-yellow-400/10' : 'text-text-secondary hover:bg-border-light')}>
+        <button onClick={() => toggleEquipo(team)}
+          className="btn-ghost flex items-center gap-1.5 px-3 py-1.5 text-sm"
+          style={{ color: isFav ? '#facc15' : 'var(--text-muted)' }}>
           <Star className={cn('w-4 h-4', isFav && 'fill-current')} />
           {isFav ? 'Guardado' : 'Guardar'}
         </button>
       </div>
 
       <div className="card p-5">
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-4 mb-5">
           <div className="flex -space-x-3 shrink-0">
-            {[team.player1, team.player2].map((p, i) => (
-              <div key={i} className="w-14 h-14 rounded-full bg-border-hover border-2 border-border-light flex items-center justify-center text-2xl">
-                {p?.country?.flag}
+            {[team.jugador1, team.jugador2].map((j, i) => (
+              <div key={i} className="w-14 h-14 rounded-full flex items-center justify-center text-2xl border-2"
+                style={{ backgroundColor: 'var(--bg-hover)', borderColor: 'var(--bg-card)' }}>
+                {j?.country?.flag || '👤'}
               </div>
             ))}
           </div>
           <div>
-            <h1 className="text-xl font-bold text-text-primary">{team.nombre}</h1>
-            <p className="text-sm text-text-secondary mt-0.5">{team.circuito}</p>
-            <div className="flex items-center gap-3 mt-2">
-              <span className="text-2xl font-bold text-brand">#{team.stats?.ranking}</span>
-              <span className="text-text-muted">·</span>
-              <span className="text-text-primary font-semibold">{team.stats?.puntos?.toLocaleString()} pts</span>
-            </div>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{team.nombre}</h1>
+            {team.categoria && (
+              <span className="badge-padel mt-1 inline-block">{team.categoria.nombre}</span>
+            )}
+            {team.stats && (
+              <div className="flex items-center gap-4 mt-3">
+                <div>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--color-brand)' }}>#{team.stats.ranking}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Ranking</p>
+                </div>
+                <div className="w-px h-8" style={{ backgroundColor: 'var(--border-color)' }} />
+                <div>
+                  <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    {team.stats.puntos?.toLocaleString()}
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Puntos</p>
+                </div>
+                <div className="w-px h-8" style={{ backgroundColor: 'var(--border-color)' }} />
+                <div>
+                  <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    <span style={{ color: '#22c55e' }}>{team.stats.victorias}V</span>
+                    {' / '}
+                    <span style={{ color: '#ef4444' }}>{team.stats.derrotas}D</span>
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Balance</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 pt-4 border-t border-border-light">
-          {[
-            { label: 'Victorias', value: team.stats?.victorias ?? '—' },
-            { label: 'Derrotas',  value: team.stats?.derrotas  ?? '—' },
-            { label: 'Puntos',    value: team.stats?.puntos?.toLocaleString() ?? '—' },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="text-lg font-bold text-text-primary">{s.value}</p>
-              <p className="text-xs text-text-secondary">{s.label}</p>
+        {/* Jugadores */}
+        <div className="space-y-3 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+          {[team.jugador1, team.jugador2].map((j, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0"
+                style={{ backgroundColor: 'var(--bg-hover)' }}>
+                {j?.country?.flag || '👤'}
+              </div>
+              <div>
+                <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                  {j?.nombre} {j?.apellido}
+                </p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {j?.country?.name} {j?.mano ? `· ${j.mano}` : ''}
+                </p>
+              </div>
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="space-y-3">
-        {[team.player1, team.player2].map((p) => (
-          <div key={p?.id} className="card p-4 flex items-center gap-3">
-            <span className="text-2xl">{p?.country?.flag}</span>
-            <div>
-              <p className="font-semibold text-text-primary">{p?.nombre}</p>
-              <p className="text-xs text-text-secondary">{p?.country?.name}</p>
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   )

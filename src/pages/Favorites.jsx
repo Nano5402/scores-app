@@ -6,73 +6,102 @@ import EmptyState            from '../components/common/EmptyState'
 import useFavoritesStore     from '../store/useFavoritesStore'
 
 const TABS = [
-  { value: 'players',  label: 'Jugadores' },
-  { value: 'teams',    label: 'Parejas' },
-  { value: 'matches',  label: 'Partidos' },
+  { value: 'jugadores', label: 'Jugadores' },
+  { value: 'equipos',   label: 'Parejas' },
+  { value: 'partidos',  label: 'Partidos' },
 ]
 
 export default function Favorites() {
-  const [tab, setTab] = useState('players')
-  const { players, teams, matches, togglePlayer, toggleTeam, toggleMatch } = useFavoritesStore()
+  const [tab, setTab] = useState('jugadores')
+  const { jugadores, equipos, partidos, toggleJugador, toggleEquipo, togglePartido } = useFavoritesStore()
 
   const tabsWithCount = TABS.map((t) => {
-    const count = t.value === 'players' ? players.length : t.value === 'teams' ? teams.length : matches.length
+    const count = t.value === 'jugadores' ? jugadores.length
+                : t.value === 'equipos'   ? equipos.length
+                : partidos.length
     return { ...t, label: `${t.label}${count ? ` (${count})` : ''}` }
   })
 
   return (
     <div className="space-y-5 animate-fade-up">
-      <h1 className="text-xl font-bold text-text-primary">Favoritos</h1>
+      <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Favoritos</h1>
       <Tabs tabs={tabsWithCount} activeTab={tab} onChange={setTab} />
 
-      {tab === 'players' && (
-        players.length === 0
-          ? <EmptyState icon={Star} title="Sin jugadores favoritos" description="Explora jugadores y guárdalos aquí." />
+      {tab === 'jugadores' && (
+        jugadores.length === 0
+          ? <EmptyState icon={Star} title="Sin jugadores favoritos"
+              description="Explora jugadores y guárdalos aquí." />
           : <div className="space-y-3">
-              {players.map((p) => (
-                <div key={p.id} className="card p-4 flex items-center gap-3">
-                  <Link to={`/player/${p.id}`} className="flex-1 flex items-center gap-3">
-                    <span className="text-xl">{p.country?.flag}</span>
-                    <div><p className="font-medium text-text-primary text-sm">{p.nombre}</p><p className="text-xs text-text-secondary">{p.circuito} · #{p.stats?.ranking}</p></div>
-                  </Link>
-                  <button onClick={() => togglePlayer(p)} className="p-2 rounded-lg text-red-400 hover:bg-red-400/10 transition-all"><Trash2 className="w-4 h-4" /></button>
-                </div>
-              ))}
-            </div>
-      )}
-
-      {tab === 'teams' && (
-        teams.length === 0
-          ? <EmptyState icon={Star} title="Sin parejas favoritas" description="Explora parejas de pádel y guárdalas aquí." />
-          : <div className="space-y-3">
-              {teams.map((t) => (
-                <div key={t.id} className="card p-4 flex items-center gap-3">
-                  <Link to={`/team/${t.id}`} className="flex-1 flex items-center gap-3">
-                    <div className="flex -space-x-2">
-                      {[t.player1, t.player2].map((p, i) => <span key={i} className="w-8 h-8 rounded-full bg-border-hover flex items-center justify-center text-sm border-2 border-border-light">{p?.country?.flag}</span>)}
+              {jugadores.map((j) => (
+                <div key={j.id} className="card p-4 flex items-center gap-3">
+                  <Link to={`/player/${j.id}`} className="flex-1 flex items-center gap-3">
+                    <span className="text-xl">{j.country?.flag}</span>
+                    <div>
+                      <p className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
+                        {j.nombre} {j.apellido}
+                      </p>
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        {j.categoria?.nombre}
+                      </p>
                     </div>
-                    <div><p className="font-medium text-text-primary text-sm">{t.nombre}</p><p className="text-xs text-text-secondary">#{t.stats?.ranking}</p></div>
                   </Link>
-                  <button onClick={() => toggleTeam(t)} className="p-2 rounded-lg text-red-400 hover:bg-red-400/10 transition-all"><Trash2 className="w-4 h-4" /></button>
+                  <button onClick={() => toggleJugador(j)}
+                    className="p-2 rounded-lg transition-all"
+                    style={{ color: '#ef4444' }}>
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               ))}
             </div>
       )}
 
-      {tab === 'matches' && (
-        matches.length === 0
-          ? <EmptyState icon={Star} title="Sin partidos guardados" description="Guarda partidos desde cualquier sección." />
+      {tab === 'equipos' && (
+        equipos.length === 0
+          ? <EmptyState icon={Star} title="Sin parejas favoritas"
+              description="Explora parejas de pádel y guárdalas aquí." />
           : <div className="space-y-3">
-              {matches.map((m) => {
-                const p1 = m.deporte === 'padel' ? m.team1?.nombre : m.player1?.nombre_corto
-                const p2 = m.deporte === 'padel' ? m.team2?.nombre : m.player2?.nombre_corto
+              {equipos.map((e) => (
+                <div key={e.id} className="card p-4 flex items-center gap-3">
+                  <Link to={`/team/${e.id}`} className="flex-1">
+                    <p className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{e.nombre}</p>
+                  </Link>
+                  <button onClick={() => toggleEquipo(e)}
+                    className="p-2 rounded-lg transition-all"
+                    style={{ color: '#ef4444' }}>
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+      )}
+
+      {tab === 'partidos' && (
+        partidos.length === 0
+          ? <EmptyState icon={Star} title="Sin partidos guardados"
+              description="Guarda partidos desde cualquier sección." />
+          : <div className="space-y-3">
+              {partidos.map((p) => {
+                const p1 = p.deporte === 'padel'
+                  ? p.equipo1?.nombre
+                  : `${p.jugador1?.nombre || ''} ${p.jugador1?.apellido || ''}`.trim()
+                const p2 = p.deporte === 'padel'
+                  ? p.equipo2?.nombre
+                  : `${p.jugador2?.nombre || ''} ${p.jugador2?.apellido || ''}`.trim()
                 return (
-                  <div key={m.id} className="card p-4 flex items-center gap-3">
-                    <Link to={`/match/${m.id}`} className="flex-1">
-                      <p className="font-medium text-text-primary text-sm">{p1} vs {p2}</p>
-                      <p className="text-xs text-text-secondary mt-0.5">{m.tournament?.nombre} · {m.ronda}</p>
+                  <div key={p.id} className="card p-4 flex items-center gap-3">
+                    <Link to={`/match/${p.id}`} className="flex-1">
+                      <p className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
+                        {p1} vs {p2}
+                      </p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                        {p.torneo?.nombre} · {p.ronda}
+                      </p>
                     </Link>
-                    <button onClick={() => toggleMatch(m)} className="p-2 rounded-lg text-red-400 hover:bg-red-400/10 transition-all"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => togglePartido(p)}
+                      className="p-2 rounded-lg transition-all"
+                      style={{ color: '#ef4444' }}>
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 )
               })}

@@ -7,12 +7,6 @@ import Tabs                  from '../components/ui/Tabs'
 import { useMatches }        from '../hooks/useMatches'
 import { usePlayers }        from '../hooks/usePlayers'
 
-const CIRCUIT_TABS = [
-  { value: 'ATP',        label: 'ATP' },
-  { value: 'WTA',        label: 'WTA' },
-  { value: 'Challenger', label: 'Challenger' },
-]
-
 const VIEW_TABS = [
   { value: 'results',  label: 'Resultados' },
   { value: 'upcoming', label: 'Próximos' },
@@ -20,21 +14,16 @@ const VIEW_TABS = [
 ]
 
 export default function Tennis() {
-  const [circuit, setCircuit] = useState('ATP')
-  const [view,    setView]    = useState('results')
+  const [view, setView] = useState('results')
 
-  const { matches: live,     loading: ll } = useMatches({ estado: 'live',     deporte: 'tenis' })
-  const { matches: finished, loading: lf } = useMatches({ estado: 'finished', deporte: 'tenis' })
-  const { matches: upcoming }              = useMatches({ estado: 'upcoming', deporte: 'tenis' })
-  const { players, loading: lp }           = usePlayers({ deporte: 'tenis', circuito: circuit })
+  const { matches: live,     loading: ll } = useMatches({ estado: 'en_vivo',    deporte: 'tenis' })
+  const { matches: finished, loading: lf } = useMatches({ estado: 'finalizado', deporte: 'tenis' })
+  const { matches: upcoming }              = useMatches({ estado: 'programado', deporte: 'tenis' })
+  const { players, loading: lp }           = usePlayers({ deporte: 'tenis' })
 
   return (
     <div className="space-y-5 animate-fade-up">
-      <div>
-        <h1 className="text-xl font-bold text-text-primary mb-4">Tenis</h1>
-        <Tabs tabs={CIRCUIT_TABS} activeTab={circuit} onChange={setCircuit} />
-      </div>
-
+      <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Tenis</h1>
       <Tabs tabs={VIEW_TABS} activeTab={view} onChange={setView} />
 
       {view === 'results' && (
