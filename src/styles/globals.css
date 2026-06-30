@@ -20,13 +20,14 @@
   --radius-full: 9999px;
 
   /* ── MARCA Y ESTADO (idénticos en ambos modos) ── */
-  --color-live:  #ef4444;
+  --color-live:  #ea580c;
   --color-win:   #22c55e;
   --color-loss:  #ef4444;
 
   /* ══════════════════════════════
      MODO CLARO  — Verde / Blanco
      ══════════════════════════════ */
+  --color-live:      #16a34a;
   --color-brand:     #16a34a;
   --color-brand-rgb: 22, 163, 74;
   --color-brand-dim: rgba(22, 163, 74, 0.12);
@@ -55,7 +56,8 @@
    MODO OSCURO  — Naranja / Negro OLED
    ══════════════════════════════ */
 .dark {
-  --color-brand:     #ea580c;
+  --color-brand: #ea580c;
+  --color-live:  #ea580c;
   --color-brand-rgb: 234, 88, 12;
   --color-brand-dim: rgba(234, 88, 12, 0.12);
 

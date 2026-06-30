@@ -4,6 +4,7 @@ import { Plus, Pencil, Trash2, X } from 'lucide-react'
 import { teamService }      from '../../services/teamService'
 import { playerService }    from '../../services/playerService'
 import { categoriaService } from '../../services/categoriaService'
+import { confirm }          from '../../utils/confirm'
 import useUIStore            from '../../store/useUIStore'
 import Button                from '../../components/ui/Button'
 import Input                 from '../../components/ui/Input'
@@ -69,7 +70,14 @@ export default function GestionEquipos() {
   }
 
   const handleDelete = async (equipo) => {
-    if (!window.confirm(`¿Eliminar la pareja ${equipo.nombre}?`)) return
+    const ok = await confirm({
+      title:       'Eliminar pareja',
+      message:     `Esta acción eliminará permanentemente la pareja "${equipo.nombre}" y no se puede deshacer.`,
+      confirmLabel:'Eliminar',
+      danger:      true,
+      requireText: equipo.nombre,
+    })
+    if (!ok) return
     try {
       await teamService.remove(equipo.id)
       addToast({ type: 'success', title: 'Equipo eliminado' })

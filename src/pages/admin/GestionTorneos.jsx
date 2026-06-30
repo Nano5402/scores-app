@@ -4,6 +4,7 @@ import { Plus, Pencil, Trash2, X } from 'lucide-react'
 import { tournamentService } from '../../services/tournamentService'
 import { categoriaService }  from '../../services/categoriaService'
 import { sedeService }       from '../../services/sedeService'
+import { confirm }           from '../../utils/confirm'
 import useUIStore             from '../../store/useUIStore'
 import Button                 from '../../components/ui/Button'
 import Input                  from '../../components/ui/Input'
@@ -91,7 +92,14 @@ export default function GestionTorneos() {
   }
 
   const handleDelete = async (torneo) => {
-    if (!window.confirm(`¿Eliminar el torneo "${torneo.nombre}"?`)) return
+    const ok = await confirm({
+      title:       'Eliminar torneo',
+      message:     `Esta acción eliminará permanentemente el torneo "${torneo.nombre}", junto con sus inscripciones y partidos asociados. No se puede deshacer.`,
+      confirmLabel:'Eliminar',
+      danger:      true,
+      requireText: torneo.nombre,
+    })
+    if (!ok) return
     try {
       await tournamentService.remove(torneo.id)
       addToast({ type: 'success', title: 'Torneo eliminado' })

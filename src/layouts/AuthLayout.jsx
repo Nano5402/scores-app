@@ -1,5 +1,7 @@
 import { Outlet, Navigate, useLocation } from 'react-router-dom'
-import useAuthStore from '../store/useAuthStore'
+import { Suspense }   from 'react'
+import useAuthStore   from '../store/useAuthStore'
+import ContentLoader  from '../components/ui/ContentLoader'
 
 export default function AuthLayout() {
   const { isAuthenticated } = useAuthStore()
@@ -20,7 +22,9 @@ export default function AuthLayout() {
           backgroundColor: 'var(--bg-primary)',
         }}
       >
-        <Outlet />
+        <Suspense fallback={<ContentLoader />}>
+          <Outlet />
+        </Suspense>
       </div>
     )
   }
@@ -46,7 +50,9 @@ export default function AuthLayout() {
 
       {/* Panel derecho — formulario */}
       <div className="auth-side-form">
-        <Outlet />
+        <Suspense fallback={<ContentLoader />}>
+          <Outlet />
+        </Suspense>
       </div>
     </div>
   )

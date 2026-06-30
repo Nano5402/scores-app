@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useForm }             from 'react-hook-form'
 import { Plus, Pencil, Trash2, Search, X } from 'lucide-react'
 import { playerService }    from '../../services/playerService'
+import { confirm }          from '../../utils/confirm'
 import { categoriaService } from '../../services/categoriaService'
 import useUIStore            from '../../store/useUIStore'
 import Button                from '../../components/ui/Button'
@@ -76,7 +77,14 @@ export default function GestionJugadores() {
   }
 
   const handleDelete = async (jugador) => {
-    if (!window.confirm(`¿Eliminar a ${jugador.nombre} ${jugador.apellido}?`)) return
+    const ok = await confirm({
+      title:       'Eliminar jugador',
+      message:     `Esta acción eliminará permanentemente a ${jugador.nombre} ${jugador.apellido} y no se puede deshacer.`,
+      confirmLabel:'Eliminar',
+      danger:      true,
+      requireText: `${jugador.nombre} ${jugador.apellido}`,
+    })
+    if (!ok) return
     try {
       await playerService.remove(jugador.id)
       addToast({ type: 'success', title: 'Jugador eliminado' })

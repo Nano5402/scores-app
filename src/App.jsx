@@ -1,7 +1,7 @@
-import { Suspense, useEffect } from 'react'
-import AppRouter from './routes'
-import Loader from './components/ui/Loader'
-import useUIStore from './store/useUIStore'
+import { useEffect } from 'react'
+import AppRouter      from './routes'
+import ConfirmDialog  from './components/ui/ConfirmDialog'
+import useUIStore     from './store/useUIStore'
 
 export default function App() {
   const { darkMode } = useUIStore()
@@ -15,8 +15,10 @@ export default function App() {
   }, [darkMode])
 
   return (
-    <Suspense fallback={<Loader fullscreen />}>
+    <>
       <AppRouter />
-    </Suspense>
+      {/* Diálogo de confirmación global — invocado vía confirm() en utils/confirm.js */}
+      <ConfirmDialog />
+    </>
   )
 }

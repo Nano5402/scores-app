@@ -6,6 +6,7 @@ import { playerService }     from '../../services/playerService'
 import { teamService }       from '../../services/teamService'
 import { tournamentService } from '../../services/tournamentService'
 import { sedeService }       from '../../services/sedeService'
+import { confirm }           from '../../utils/confirm'
 import useUIStore             from '../../store/useUIStore'
 import Button                 from '../../components/ui/Button'
 import Input                  from '../../components/ui/Input'
@@ -157,7 +158,13 @@ export default function GestionPartidos() {
   }
 
   const handleDelete = async (partido) => {
-    if (!window.confirm('¿Eliminar este partido?')) return
+    const ok = await confirm({
+      title:       'Eliminar partido',
+      message:     'Esta acción eliminará permanentemente el partido junto con su marcador. No se puede deshacer.',
+      confirmLabel:'Eliminar',
+      danger:      true,
+    })
+    if (!ok) return
     try {
       await matchService.remove(partido.id)
       addToast({ type: 'success', title: 'Partido eliminado' })
