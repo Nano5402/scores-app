@@ -1,27 +1,27 @@
-import { cn }    from '../../utils/cn'
-import Loader    from './Loader'
+import { cn } from '../../utils/cn'
+import Loader from './Loader'
 
 const variants = {
-  primary:   'btn-primary',
+  primary: 'btn-primary',
   secondary: 'btn-secondary',
-  ghost:     'btn-ghost',
-  danger:    'btn-danger',
-  outline:   'btn-secondary',
+  ghost: 'btn-ghost',
+  danger: 'btn-danger',
+  outline: 'btn-secondary',
 }
 
 const sizes = {
-  sm:   'text-xs px-3 py-2',
-  md:   '',                    // usa el padding por defecto de .btn
-  lg:   'text-sm px-6 py-3',
+  sm: 'text-xs px-3 py-2',
+  md: '', // usa el padding por defecto de .btn
+  lg: 'text-sm px-6 py-3',
   icon: 'p-2',
 }
 
 export default function Button({
   children,
-  variant   = 'primary',
-  size      = 'md',
-  loading   = false,
-  disabled  = false,
+  variant = 'primary',
+  size = 'md',
+  loading = false,
+  disabled = false,
   fullWidth = false,
   className = '',
   leftIcon,
@@ -30,22 +30,17 @@ export default function Button({
 }) {
   return (
     <button
-      className={cn(
-        variants[variant],
-        sizes[size],
-        fullWidth && 'w-full',
-        className
-      )}
+      className={cn(variants[variant], sizes[size], fullWidth && 'w-full', className)}
       disabled={disabled || loading}
       {...props}
     >
       {loading ? (
-        <Loader size="sm" />
+        <Loader size='sm' />
       ) : (
         <>
-          {leftIcon  && <span className="shrink-0">{leftIcon}</span>}
+          {leftIcon && <span className='shrink-0'>{leftIcon}</span>}
           {children}
-          {rightIcon && <span className="shrink-0">{rightIcon}</span>}
+          {rightIcon && <span className='shrink-0'>{rightIcon}</span>}
         </>
       )}
     </button>

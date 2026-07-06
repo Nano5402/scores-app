@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
-import AppRouter      from './routes'
-import ConfirmDialog  from './components/ui/ConfirmDialog'
-import useUIStore     from './store/useUIStore'
+import AppRouter from './routes'
+import ConfirmDialog from './components/ui/ConfirmDialog'
+import useUIStore from './store/useUIStore'
 
 export default function App() {
   const { darkMode } = useUIStore()

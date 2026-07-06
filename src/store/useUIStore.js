@@ -4,7 +4,6 @@ import { persist } from 'zustand/middleware'
 const useUIStore = create(
   persist(
     (set, get) => ({
-
       // ── Tema ────────────────────────────────────────
       darkMode: true,
       toggleDarkMode: () => {
@@ -15,10 +14,8 @@ const useUIStore = create(
 
       // ── Sidebar ─────────────────────────────────────
       sidebarCollapsed: true,
-      toggleSidebar: () =>
-        set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
-      setSidebarCollapsed: (val) =>
-        set({ sidebarCollapsed: val }),
+      toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+      setSidebarCollapsed: (val) => set({ sidebarCollapsed: val }),
 
       // ── Idioma ──────────────────────────────────────
       language: 'es',
@@ -26,8 +23,8 @@ const useUIStore = create(
 
       // ── Notificaciones ──────────────────────────────
       notifications: {
-        push:       true,
-        enVivo:     true,
+        push: true,
+        enVivo: true,
         resultados: false,
       },
       setNotification: (key, value) =>
@@ -44,14 +41,13 @@ const useUIStore = create(
           set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }))
         }, duration)
       },
-      removeToast: (id) =>
-        set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
+      removeToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
     }),
     {
       name: 'ui-storage',
       partialize: (s) => ({
-        darkMode:      s.darkMode,
-        language:      s.language,
+        darkMode: s.darkMode,
+        language: s.language,
         notifications: s.notifications,
         // No persistir sidebarCollapsed — siempre inicia colapsado en mobile
       }),

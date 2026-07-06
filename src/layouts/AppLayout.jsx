@@ -1,13 +1,13 @@
-import { Outlet }        from 'react-router-dom'
-import { Suspense }      from 'react'
-import Header           from '../components/layout/Header'
-import Sidebar          from '../components/layout/Sidebar'
+import { Outlet } from 'react-router-dom'
+import { Suspense } from 'react'
+import Header from '../components/layout/Header'
+import Sidebar from '../components/layout/Sidebar'
 import BottomNavigation from '../components/layout/BottomNavigation'
-import ToastContainer   from '../components/ui/Toast'
-import ContentLoader    from '../components/ui/ContentLoader'
-import useUIStore       from '../store/useUIStore'
+import ToastContainer from '../components/ui/Toast'
+import ContentLoader from '../components/ui/ContentLoader'
+import useUIStore from '../store/useUIStore'
 import { useHealthCheck } from '../hooks/useHealthCheck'
-import { cn }           from '../utils/cn'
+import { cn } from '../utils/cn'
 
 export default function AppLayout() {
   const { sidebarCollapsed } = useUIStore()
@@ -16,15 +16,17 @@ export default function AppLayout() {
   useHealthCheck()
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className='min-h-screen' style={{ backgroundColor: 'var(--bg-primary)' }}>
       <Header />
       <Sidebar />
       {/* Header y Sidebar quedan FUERA de este Suspense — nunca se desmontan al navegar */}
-      <main className={cn(
-        'transition-all duration-300 pt-14 pb-20 lg:pb-6',
-        sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-60'
-      )}>
-        <div className="max-w-4xl mx-auto px-4 py-6">
+      <main
+        className={cn(
+          'transition-all duration-300 pt-14 pb-20 lg:pb-6',
+          sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-60'
+        )}
+      >
+        <div className='max-w-4xl mx-auto px-4 py-6'>
           <Suspense fallback={<ContentLoader />}>
             <Outlet />
           </Suspense>

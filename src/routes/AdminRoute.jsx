@@ -5,7 +5,7 @@ export default function AdminRoute({ children }) {
   const { user } = useAuthStore()
 
   if (user?.rol !== 'admin') {
-    return <Navigate to="/" replace />
+    return <Navigate to='/' replace />
   }
 
   return children

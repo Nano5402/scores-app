@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react'
-import { useNavigate }       from 'react-router-dom'
-import api                   from '../services/api'
-import useAuthStore          from '../store/useAuthStore'
-import useUIStore            from '../store/useUIStore'
+import { useNavigate } from 'react-router-dom'
+import api from '../services/api'
+import useAuthStore from '../store/useAuthStore'
+import useUIStore from '../store/useUIStore'
 
-const CHECK_INTERVAL = 5000   // cada 5s
-const MAX_FAILURES   = 3      // 3 tics fallidos seguidos → logout
+const CHECK_INTERVAL = 5000 // cada 5s
+const MAX_FAILURES = 3 // 3 tics fallidos seguidos → logout
 
 /**
  * Verifica periódicamente que el backend siga respondiendo.
@@ -17,12 +17,12 @@ const MAX_FAILURES   = 3      // 3 tics fallidos seguidos → logout
  */
 export function useHealthCheck() {
   const { isAuthenticated, logout } = useAuthStore()
-  const { addToast }                = useUIStore()
-  const navigate                    = useNavigate()
+  const { addToast } = useUIStore()
+  const navigate = useNavigate()
 
-  const failCount    = useRef(0)
+  const failCount = useRef(0)
   const hasLoggedOut = useRef(false)
-  const warnedOnce   = useRef(false)
+  const warnedOnce = useRef(false)
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -55,8 +55,8 @@ export function useHealthCheck() {
         if (failCount.current === 2 && !warnedOnce.current) {
           warnedOnce.current = true
           addToast({
-            type:    'error',
-            title:   'Problemas de conexión',
+            type: 'error',
+            title: 'Problemas de conexión',
             message: 'No se puede contactar al servidor. Reintentando...',
           })
         }
@@ -66,9 +66,10 @@ export function useHealthCheck() {
           clearInterval(intervalId)
           logout()
           addToast({
-            type:    'error',
-            title:   'Sesión cerrada',
-            message: 'Se perdió la conexión con el servidor. Inicia sesión de nuevo cuando esté disponible.',
+            type: 'error',
+            title: 'Sesión cerrada',
+            message:
+              'Se perdió la conexión con el servidor. Inicia sesión de nuevo cuando esté disponible.',
           })
           navigate('/login')
         }

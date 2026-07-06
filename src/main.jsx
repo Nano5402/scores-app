@@ -9,5 +9,5 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter future={{ v7_relativeSplatPath: true }}>
       <App />
     </BrowserRouter>
-  </StrictMode>,
+  </StrictMode>
 )

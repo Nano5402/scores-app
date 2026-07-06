@@ -4,10 +4,11 @@ import { playerService } from '../services/playerService'
 export function usePlayers(filters = {}) {
   const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    playerService.getAll(filters)
+    playerService
+      .getAll(filters)
       .then((res) => setPlayers(res.data || []))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
@@ -17,13 +18,14 @@ export function usePlayers(filters = {}) {
 }
 
 export function usePlayer(id) {
-  const [player,  setPlayer]  = useState(null)
+  const [player, setPlayer] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     if (!id) return
-    playerService.getById(id)
+    playerService
+      .getById(id)
       .then((res) => setPlayer(res.data))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))

@@ -7,7 +7,7 @@ import Loader from './Loader'
  */
 export default function ContentLoader() {
   return (
-    <div className="flex items-center justify-center py-24">
+    <div className='flex items-center justify-center py-24'>
       <Loader />
     </div>
   )

@@ -1,196 +1,257 @@
-# 🎾 ScoreApp — Club Deportivo
+# ScoreApp
 
-Plataforma web de gestión de resultados en tiempo real para un **club local de Tenis y Pádel** en Cúcuta, Colombia.
-Inspirada visualmente en Sofascore y Flashscore, adaptada para uso interno del club.
-
----
-
-## 🚀 Stack tecnológico
-
-### Frontend
-| Tecnología | Uso |
-|---|---|
-| React 19 + Vite | UI y bundler |
-| React Router DOM v6 | Navegación SPA |
-| TailwindCSS | Utilidades de layout |
-| CSS Variables | Sistema de temas (claro/oscuro) |
-| Zustand | Estado global |
-| Axios | Cliente HTTP |
-| React Hook Form | Formularios con validación |
-| Lucide React | Iconografía |
-
-### Backend
-| Tecnología | Uso |
-|---|---|
-| Node.js + Express | API REST |
-| MySQL 8.0 (XAMPP) | Base de datos |
-| bcryptjs | Hash de contraseñas |
-| jsonwebtoken | Autenticación JWT |
-| nodemailer | Envío de OTP por correo |
-| multer + uuid | Subida de imágenes |
+Frontend web para **ScoreApp**, plataforma de gestión de resultados en tiempo real para el Club Unión de Bucaramanga. Tenis y Pádel.
 
 ---
 
-## 📁 Estructura del proyecto
+## Stack
 
-```
-ScoresApp/
-├── scores-app/          ← Frontend React
-│   ├── src/
-│   │   ├── components/  ← Componentes reutilizables
-│   │   ├── layouts/     ← AuthLayout, AppLayout, AdminLayout
-│   │   ├── pages/       ← Vistas públicas
-│   │   │   ├── admin/   ← Panel de administración
-│   │   │   └── auth/    ← Login, Register, ForgotPassword
-│   │   ├── routes/      ← Router, ProtectedRoute, AdminRoute
-│   │   ├── services/    ← Llamadas a la API
-│   │   ├── store/       ← Stores de Zustand
-│   │   ├── hooks/       ← Custom hooks
-│   │   └── utils/       ← Utilidades
-│   └── reset_db.sql     ← Script de DB completo
-│
-└── scores-api/          ← Backend Express
-    ├── server.js
-    └── src/
-        ├── config/
-        ├── middlewares/
-        ├── modules/     ← auth, jugadores, equipos, torneos, partidos...
-        └── utils/
+| Tecnología       | Versión | Uso                   |
+| ---------------- | ------- | --------------------- |
+| React            | 19.0    | UI                    |
+| Vite             | 6.0     | Bundler               |
+| React Router DOM | 6.28    | Navegación SPA        |
+| Zustand          | 5.0     | Estado global         |
+| Axios            | 1.7     | Cliente HTTP          |
+| React Hook Form  | 7.54    | Formularios           |
+| Zod              | 3.24    | Validación de schemas |
+| Lucide React     | 0.469   | Iconografía           |
+| TailwindCSS      | 3.4     | Utilidades de layout  |
+| Prettier         | 3.9     | Formateo de código    |
+
+---
+
+## Instalación
+
+```bash
+git clone <repo>
+cd scores-app
+npm install
+npm run dev     # http://localhost:5173
 ```
 
 ---
 
-## 🗺️ Rutas
+## Variables de entorno (`.env`)
+
+```env
+VITE_API_URL=http://localhost:3001/api
+```
+
+---
+
+## Estructura
+
+```
+scores-app/
+├── src/
+│   ├── App.jsx
+│   ├── main.jsx
+│   ├── styles/
+│   │   └── globals.css         ← CSS variables del sistema de diseño
+│   ├── routes/
+│   │   ├── index.jsx           ← Router principal (lazy loading)
+│   │   ├── ProtectedRoute.jsx  ← Requiere sesión activa
+│   │   └── AdminRoute.jsx      ← Requiere rol admin
+│   ├── layouts/
+│   │   ├── AuthLayout.jsx      ← Login/Register/ForgotPassword
+│   │   ├── AppLayout.jsx       ← App principal (miembros)
+│   │   └── AdminLayout.jsx     ← Panel de administración
+│   ├── pages/
+│   │   ├── auth/               ← Login, Register, ForgotPassword
+│   │   ├── admin/              ← Panel admin (10 secciones)
+│   │   ├── Home.jsx
+│   │   ├── Live.jsx
+│   │   ├── Tennis.jsx
+│   │   ├── Padel.jsx
+│   │   ├── Match.jsx
+│   │   ├── Player.jsx
+│   │   ├── Team.jsx
+│   │   ├── Favorites.jsx
+│   │   ├── Profile.jsx
+│   │   └── Settings.jsx
+│   ├── components/
+│   │   ├── ui/                 ← Button, Input, Tabs, Toast, ConfirmDialog...
+│   │   ├── layout/             ← Header, Sidebar, BottomNavigation
+│   │   ├── common/             ← ThemeToggle, EmptyState, SectionHeader...
+│   │   ├── match/              ← MatchCard, LiveBadge, ScoreDisplay
+│   │   ├── player/             ← PlayerCard
+│   │   └── team/               ← TeamCard
+│   ├── services/               ← Llamadas a la API (Axios)
+│   │   ├── api.js              ← Instancia Axios + interceptores
+│   │   ├── authService.js
+│   │   ├── matchService.js
+│   │   ├── playerService.js
+│   │   ├── teamService.js
+│   │   ├── tournamentService.js
+│   │   ├── newsService.js
+│   │   ├── categoriaService.js
+│   │   ├── sedeService.js
+│   │   └── userService.js
+│   ├── store/                  ← Zustand
+│   │   ├── useAuthStore.js     ← Sesión + rol
+│   │   ├── useUIStore.js       ← Tema, sidebar, idioma, notificaciones
+│   │   ├── useFavoritesStore.js
+│   │   └── useConfirmStore.js  ← Diálogo de confirmación global
+│   ├── hooks/
+│   │   ├── useMatches.js
+│   │   ├── usePlayers.js
+│   │   ├── useHealthCheck.js   ← Ping al backend, auto-logout si cae
+│   │   ├── useDebounce.js
+│   │   └── useLocalStorage.js
+│   └── utils/
+│       ├── cn.js               ← Merge de clases CSS
+│       ├── confirm.js          ← Reemplazo de window.confirm()
+│       ├── formatDate.js
+│       └── formatScore.js
+└── reset_db.sql                ← Schema completo de la base de datos
+```
+
+---
+
+## Rutas
+
+### Públicas (autenticación)
+
+| Ruta               | Página                            |
+| ------------------ | --------------------------------- |
+| `/login`           | Login con número de cédula        |
+| `/register`        | Registro (primer usuario = admin) |
+| `/forgot-password` | Recuperación con OTP              |
 
 ### App (miembros)
-| Ruta | Descripción |
-|---|---|
-| `/` | Home — partidos en vivo, anuncios, próximos |
-| `/live` | Partidos en directo |
-| `/tennis` | Sección tenis |
-| `/padel` | Sección pádel |
-| `/match/:id` | Detalle de partido |
-| `/player/:id` | Perfil de jugador |
-| `/team/:id` | Perfil de pareja |
-| `/favorites` | Favoritos |
-| `/profile` | Perfil de usuario |
-| `/settings` | Configuración |
 
-### Admin (solo rol admin)
-| Ruta | Descripción |
-|---|---|
-| `/admin` | Dashboard del club |
-| `/admin/jugadores` | CRUD de jugadores |
-| `/admin/equipos` | CRUD de parejas de pádel |
-| `/admin/torneos` | CRUD de torneos |
-| `/admin/partidos` | CRUD de partidos + marcador en vivo |
+| Ruta          | Página                             |
+| ------------- | ---------------------------------- |
+| `/`           | Home — en vivo, anuncios, próximos |
+| `/live`       | Partidos en directo                |
+| `/tennis`     | Sección tenis                      |
+| `/padel`      | Sección pádel                      |
+| `/match/:id`  | Detalle de partido                 |
+| `/player/:id` | Perfil de jugador                  |
+| `/team/:id`   | Perfil de pareja                   |
+| `/favorites`  | Favoritos                          |
+| `/profile`    | Mi perfil                          |
+| `/settings`   | Configuración                      |
 
-### Auth
-| Ruta | Descripción |
-|---|---|
-| `/login` | Login con CC + contraseña |
-| `/register` | Registro (1er usuario = admin) |
-| `/forgot-password` | Recuperación con OTP por email |
+### Admin (solo rol `admin`)
+
+| Ruta                | Sección                          |
+| ------------------- | -------------------------------- |
+| `/admin`            | Dashboard                        |
+| `/admin/jugadores`  | CRUD jugadores                   |
+| `/admin/equipos`    | CRUD parejas                     |
+| `/admin/torneos`    | CRUD torneos                     |
+| `/admin/partidos`   | CRUD partidos + marcador en vivo |
+| `/admin/posiciones` | Tabla de posiciones              |
+| `/admin/anuncios`   | CRUD anuncios                    |
+| `/admin/sedes`      | CRUD sedes y canchas             |
+| `/admin/categorias` | CRUD categorías                  |
+| `/admin/usuarios`   | Gestión de usuarios + roles      |
 
 ---
 
-## 🎨 Sistema de diseño
+## Sistema de diseño
 
-El proyecto usa **CSS Variables** para temas, NO clases de color de Tailwind.
+Basado en **CSS Variables** — no Tailwind para colores. Tailwind solo para layout y espaciado.
 
 ```css
 /* Modo claro — Verde */
---color-brand:   #16a34a;
---bg-primary:    #f4fbf7;
+--color-brand: #16a34a;
+--bg-primary: #f4fbf7;
 
-/* Modo oscuro — Naranja/Negro OLED */
---color-brand:   #ea580c;
---bg-primary:    #000000;
+/* Modo oscuro — Naranja + Negro OLED */
+--color-brand: #ea580c;
+--bg-primary: #000000;
 ```
 
-Para cambiar el color principal basta con editar `src/styles/globals.css`.
-
-**Tailwind** se usa solo para **layout y espaciado** (`flex`, `grid`, `px-4`, etc.).
-Los colores siempre van con `style={{ color: 'var(--text-primary)' }}` o clases CSS propias.
+Para cambiar el color principal del club editar `src/styles/globals.css`.
 
 ---
 
-## ⚙️ Instalación y uso
+## Funcionalidades destacadas
 
-### Prerequisitos
-- Node.js 18+
-- XAMPP con MySQL corriendo
+### Health Check automático
 
-### Base de datos
-```sql
--- En MySQL Workbench ejecutar:
-source /ruta/al/proyecto/scores-app/reset_db.sql
+`useHealthCheck` hace ping al backend cada 5 segundos. Si falla 3 veces seguidas cierra la sesión automáticamente y redirige a login con un mensaje claro.
+
+### Confirmación con doble verificación
+
+`confirm()` en `src/utils/confirm.js` reemplaza `window.confirm()`. Para eliminaciones sensibles el usuario debe escribir el nombre exacto del registro antes de confirmar.
+
+```js
+const ok = await confirm({
+  title: 'Eliminar jugador',
+  danger: true,
+  requireText: 'Carlos García',
+})
 ```
 
-### Backend
+### Lazy loading por ruta
+
+Cada página se carga como chunk separado. El `Suspense` está dentro de cada layout (no a nivel raíz), así el Header y Sidebar nunca se desmontan al navegar.
+
+### Roles
+
+- **admin** — acceso completo incluyendo `/admin/*`
+- **miembro** — solo vistas públicas del club
+
+El primer usuario en registrarse es admin automáticamente.
+
+---
+
+## Scripts
+
 ```bash
-cd scores-api
-npm install
-# Configurar .env con credenciales DB y mail
-node server.js
-# Corre en http://localhost:3001
+npm run dev          # Vite dev server — http://localhost:5173
+npm run build        # Build de producción
+npm run preview      # Preview del build
+npm run format       # Prettier — formatea todo src/
 ```
 
-### Frontend
-```bash
-cd scores-app
-npm install
-npm run dev
-# Corre en http://localhost:5173
+---
+
+## Configuración de Prettier
+
+`.prettierrc` en la raíz del proyecto:
+
+```json
+{
+  "semi": false,
+  "singleQuote": true,
+  "jsxSingleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 100,
+  "bracketSpacing": true,
+  "arrowParens": "always"
+}
 ```
 
-### Primer acceso
-1. Ve a `http://localhost:5173/register`
-2. Regístrate — **el primer usuario será admin automáticamente**
-3. Los demás usuarios serán miembros
+`.vscode/settings.json`:
+
+```json
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true
+}
+```
 
 ---
 
-## 🔐 Roles
+## Estado del proyecto
 
-| Rol | Acceso |
-|---|---|
-| `admin` | Todo — incluyendo `/admin/*` |
-| `miembro` | Solo vistas públicas del club |
-
----
-
-## 🗄️ Base de datos
-
-Tablas principales:
-`users` · `jugadores` · `jugador_stats` · `equipos_padel` · `torneos` · `partidos` · `sets_partido` · `categorias` · `sedes` · `canchas` · `inscripciones` · `anuncios` · `favoritos`
-
----
-
-## 📦 Estado del proyecto
-
-- [x] Auth completo (registro CC, login, recuperación OTP)
+- [x] Auth completo (login CC, register, OTP)
 - [x] Primer usuario = admin automático
-- [x] Sistema de temas claro/oscuro
-- [x] Layout responsive (sidebar, bottom nav, header)
-- [x] Panel admin (jugadores, equipos, torneos, partidos)
-- [x] Marcador en tiempo real desde el admin
-- [x] Páginas públicas (home, live, tenis, pádel, favoritos)
-- [ ] Tabla de posiciones (página pública)
-- [ ] Perfil de usuario conectado al backend
-- [ ] Subida de fotos (jugadores, equipos)
-- [ ] Notificaciones push
-- [ ] Modo oscuro persistente entre sesiones
-
----
-
-## 🤝 Contribuir
-
-```bash
-git checkout -b feature/nombre-funcionalidad
-git commit -m "feat: descripción"
-git push origin feature/nombre-funcionalidad
-```
-
-## 📄 Licencia
-MIT
+- [x] Sistema de temas claro/oscuro (verde/naranja OLED)
+- [x] Sidebar drawer en todas las pantallas
+- [x] Health check con auto-logout
+- [x] Panel admin con 10 secciones
+- [x] Marcador en vivo desde el admin
+- [x] Diálogo de confirmación con doble verificación
+- [x] Favoritos persistidos en localStorage
+- [ ] Perfil de jugador con privacidad configurable
+- [ ] Inscripciones a torneos desde la app
+- [ ] Notificaciones push al crear torneos
+- [ ] Tabla de posiciones en vista pública
+- [ ] Subida de fotos de jugadores

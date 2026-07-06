@@ -1,57 +1,67 @@
-import { Link }                from 'react-router-dom'
-import { ChevronRight }        from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ChevronRight } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import MatchCard               from '../components/match/MatchCard'
-import { MatchCardSkeleton }   from '../components/ui/Skeleton'
-import SectionHeader           from '../components/common/SectionHeader'
-import { useMatches }          from '../hooks/useMatches'
-import { newsService }         from '../services/newsService'
-import { formatRelative }      from '../utils/formatDate'
+import MatchCard from '../components/match/MatchCard'
+import { MatchCardSkeleton } from '../components/ui/Skeleton'
+import SectionHeader from '../components/common/SectionHeader'
+import { useMatches } from '../hooks/useMatches'
+import { newsService } from '../services/newsService'
+import { formatRelative } from '../utils/formatDate'
 
 export default function Home() {
-  const { matches: live,     loading: ll } = useMatches({ estado: 'en_vivo' })
+  const { matches: live, loading: ll } = useMatches({ estado: 'en_vivo' })
   const { matches: upcoming, loading: lu } = useMatches({ estado: 'programado' })
-  const { matches: finished }              = useMatches({ estado: 'finalizado' })
+  const { matches: finished } = useMatches({ estado: 'finalizado' })
   const [news, setNews] = useState([])
 
   useEffect(() => {
-    newsService.getAll().then((r) => setNews(r.data?.slice(0, 4) || [])).catch(() => {})
+    newsService
+      .getAll()
+      .then((r) => setNews(r.data?.slice(0, 4) || []))
+      .catch(() => {})
   }, [])
 
   return (
-    <div className="space-y-8 animate-fade-up">
-
+    <div className='space-y-8 animate-fade-up'>
       {(ll || live.length > 0) && (
         <section>
           <SectionHeader
-            title="En vivo ahora"
+            title='En vivo ahora'
             subtitle={!ll ? `${live.length} partido${live.length !== 1 ? 's' : ''} en directo` : ''}
             action={
-              <Link to="/live" className="flex items-center gap-1 text-xs font-medium"
-                style={{ color: 'var(--color-brand)' }}>
-                Ver todos <ChevronRight className="w-3.5 h-3.5" />
+              <Link
+                to='/live'
+                className='flex items-center gap-1 text-xs font-medium'
+                style={{ color: 'var(--color-brand)' }}
+              >
+                Ver todos <ChevronRight className='w-3.5 h-3.5' />
               </Link>
             }
           />
-          <div className="space-y-3">
-            {ll ? Array(2).fill(0).map((_, i) => <MatchCardSkeleton key={i} />)
-               : live.map((m) => <MatchCard key={m.id} match={m} />)}
+          <div className='space-y-3'>
+            {ll
+              ? Array(2)
+                  .fill(0)
+                  .map((_, i) => <MatchCardSkeleton key={i} />)
+              : live.map((m) => <MatchCard key={m.id} match={m} />)}
           </div>
         </section>
       )}
 
       {finished[0] && (
         <section>
-          <SectionHeader title="Último resultado" />
+          <SectionHeader title='Último resultado' />
           <MatchCard match={finished[0]} />
         </section>
       )}
 
       {news.length > 0 && (
         <section>
-          <SectionHeader title="Anuncios del club" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {news.map((n) => <NewsCard key={n.id} article={n} />)}
+          <SectionHeader title='Anuncios del club' />
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+            {news.map((n) => (
+              <NewsCard key={n.id} article={n} />
+            ))}
           </div>
         </section>
       )}
@@ -59,43 +69,48 @@ export default function Home() {
       {(lu || upcoming.length > 0) && (
         <section>
           <SectionHeader
-            title="Próximos partidos"
+            title='Próximos partidos'
             action={
-              <Link to="/tennis" className="flex items-center gap-1 text-xs font-medium"
-                style={{ color: 'var(--color-brand)' }}>
-                Ver todos <ChevronRight className="w-3.5 h-3.5" />
+              <Link
+                to='/tennis'
+                className='flex items-center gap-1 text-xs font-medium'
+                style={{ color: 'var(--color-brand)' }}
+              >
+                Ver todos <ChevronRight className='w-3.5 h-3.5' />
               </Link>
             }
           />
-          <div className="space-y-3">
-            {lu ? Array(2).fill(0).map((_, i) => <MatchCardSkeleton key={i} />)
-               : upcoming.map((m) => <MatchCard key={m.id} match={m} />)}
+          <div className='space-y-3'>
+            {lu
+              ? Array(2)
+                  .fill(0)
+                  .map((_, i) => <MatchCardSkeleton key={i} />)
+              : upcoming.map((m) => <MatchCard key={m.id} match={m} />)}
           </div>
         </section>
       )}
-
     </div>
   )
 }
 
 function NewsCard({ article }) {
   const tipos = {
-    noticia:   { label: 'Noticia',   class: 'badge-atp' },
-    evento:    { label: 'Evento',    class: 'badge-padel' },
+    noticia: { label: 'Noticia', class: 'badge-atp' },
+    evento: { label: 'Evento', class: 'badge-padel' },
     resultado: { label: 'Resultado', class: 'badge-brand' },
-    aviso:     { label: 'Aviso',     class: 'badge-live' },
+    aviso: { label: 'Aviso', class: 'badge-live' },
   }
   const tipo = tipos[article.tipo] || tipos.noticia
 
   return (
-    <div className="card-hover p-4">
-      <div className="flex items-center gap-2 mb-2">
+    <div className='card-hover p-4'>
+      <div className='flex items-center gap-2 mb-2'>
         <span className={tipo.class}>{tipo.label}</span>
       </div>
-      <h3 className="text-sm font-medium leading-snug" style={{ color: 'var(--text-primary)' }}>
+      <h3 className='text-sm font-medium leading-snug' style={{ color: 'var(--text-primary)' }}>
         {article.titulo}
       </h3>
-      <p className="text-[10px] mt-2" style={{ color: 'var(--text-muted)' }}>
+      <p className='text-[10px] mt-2' style={{ color: 'var(--text-muted)' }}>
         {formatRelative(article.created_at)}
       </p>
     </div>
