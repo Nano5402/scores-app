@@ -1,6 +1,6 @@
 # ScoreApp
 
-Frontend web para **ScoreApp**, plataforma de gestión de resultados en tiempo real para el Club Unión de Bucaramanga. Tenis y Pádel.
+Frontend web para **ScoreApp**, plataforma de gestión de resultados en tiempo real para el Club Unión de Bucaramanga. Tenis.
 
 ---
 
